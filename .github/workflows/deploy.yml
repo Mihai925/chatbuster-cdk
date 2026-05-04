@@ -1,0 +1,59 @@
+name: Deploy ChatBuster Infrastructure
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: us-east-1
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/ChatBusterGitHubActionsRole
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: CDK Bootstrap
+        run: npx cdk bootstrap aws://${{ secrets.AWS_ACCOUNT_ID }}/${{ env.AWS_REGION }}
+
+      - name: CDK Diff
+        run: npx cdk diff || true
+
+      - name: CDK Deploy
+        run: npx cdk deploy --require-approval never --outputs-file cdk-outputs.json
+
+      - name: Show outputs
+        run: cat cdk-outputs.json
+
+      - name: Trigger Instance Refresh (if app updated)
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          ASG_NAME=$(jq -r '.ChatBusterStack.ComputeAsgName' cdk-outputs.json)
+          if [ "$ASG_NAME" != "null" ]; then
+            echo "Triggering Instance Refresh for $ASG_NAME"
+            aws autoscaling start-instance-refresh \
+              --auto-scaling-group-name "$ASG_NAME" \
+              --preferences '{"MinHealthyPercentage":100,"InstanceWarmup":300}'
+          fi

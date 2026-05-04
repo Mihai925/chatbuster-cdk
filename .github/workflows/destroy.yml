@@ -1,0 +1,48 @@
+name: Destroy ChatBuster Infrastructure
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type "destroy" to confirm'
+        required: true
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: us-east-1
+
+jobs:
+  destroy:
+    runs-on: ubuntu-latest
+    if: github.event.inputs.confirm == 'destroy'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/ChatBusterGitHubActionsRole
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Disable deletion protection on RDS
+        run: |
+          aws rds modify-db-instance \
+            --db-instance-identifier chatbusterstack-databasepostgresinstance* \
+            --no-deletion-protection \
+            --apply-immediately || true
+
+      - name: CDK Destroy
+        run: npx cdk destroy --force

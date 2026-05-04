@@ -1,0 +1,55 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: One-time setup for GitHub Actions OIDC + CDK Bootstrap
+
+Parameters:
+  GitHubOrg:
+    Type: String
+    Default: Mihai925
+    Description: GitHub organization or username
+  GitHubRepo:
+    Type: String
+    Default: chatbuster-cdk
+    Description: GitHub repository name
+
+Resources:
+  # GitHub OIDC Provider
+  GitHubOIDCProvider:
+    Type: AWS::IAM::OIDCProvider
+    Properties:
+      Url: https://token.actions.githubusercontent.com
+      ClientIdList:
+        - sts.amazonaws.com
+      ThumbprintList:
+        - ffffffffffffffffffffffffffffffffffffffff
+
+  # IAM Role for GitHub Actions
+  GitHubActionsRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: ChatBusterGitHubActionsRole
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Federated: !GetAtt GitHubOIDCProvider.Arn
+            Action: sts:AssumeRoleWithWebIdentity
+            Condition:
+              StringEquals:
+                token.actions.githubusercontent.com:aud: sts.amazonaws.com
+              StringLike:
+                token.actions.githubusercontent.com:sub: !Sub repo:${GitHubOrg}/${GitHubRepo}:*
+      MaxSessionDuration: 3600
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AdministratorAccess
+
+Outputs:
+  GitHubActionsRoleArn:
+    Description: IAM Role ARN for GitHub Actions
+    Value: !GetAtt GitHubActionsRole.Arn
+
+  NextSteps:
+    Description: What to do next
+    Value: !Sub |
+      1. Add secret AWS_ACCOUNT_ID=${AWS::AccountId} to GitHub repo ${GitHubOrg}/${GitHubRepo}
+      2. Push code to main branch - GitHub Actions will bootstrap CDK and deploy automatically
