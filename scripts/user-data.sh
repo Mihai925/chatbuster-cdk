@@ -14,25 +14,6 @@ useradd -m -s /bin/bash chatbuster || true
 mkdir -p /opt/chatbuster
 cd /opt/chatbuster
 
-# TODO: Replace with your actual application repository or S3 artifact
-# Option 1: Clone from GitHub (public repo or with deploy key)
-# git clone https://github.com/YOUR_ORG/chatbuster-api.git .
-
-# Option 2: Download from S3
-# aws s3 cp s3://chatbuster-artifacts/chatbuster-api-latest.tar.gz . && tar -xzf chatbuster-api-latest.tar.gz
-
-# For now, create a placeholder that will need to be replaced
-echo "ERROR: Application source not configured. Update user-data.sh with your app source."
-
-# Install dependencies
-npm ci --production || npm install --production
-
-# Build the application
-npm run build || true
-
-# Generate Prisma client
-npm run db:generate || true
-
 # Fetch secrets from AWS Secrets Manager
 export AWS_REGION="__AWS_REGION__"
 
@@ -57,14 +38,10 @@ ANTHROPIC_API_KEY=${ANTHROPIC_KEY}
 SESSION_TOKEN_SECRET=${SESSION_SECRET}
 EOF
 
-# Run Prisma migrations
-cd /opt/chatbuster
-npx prisma migrate deploy || echo "Migration failed or not available"
-
 # Set ownership
 chown -R chatbuster:chatbuster /opt/chatbuster
 
-# Create systemd service
+# Create systemd service (will start when app is deployed)
 cat > /etc/systemd/system/chatbuster.service << EOF
 [Unit]
 Description=ChatBuster API
@@ -83,21 +60,8 @@ RestartSec=5
 WantedBy=multi-user.target
 EOF
 
-# Start the service
 systemctl daemon-reload
 systemctl enable chatbuster
-systemctl start chatbuster
 
-# Wait for health check to pass
-echo "Waiting for application to be healthy..."
-for i in {1..30}; do
-  if curl -sf http://localhost:3001/health/ready > /dev/null 2>&1; then
-    echo "Application is healthy!"
-    exit 0
-  fi
-  echo "Attempt $i: Not ready yet, waiting..."
-  sleep 10
-done
-
-echo "Application failed to become healthy within timeout"
-exit 1
+echo "Infrastructure ready. Deploy chatbuster-api to /opt/chatbuster to start the service."
+echo "User-data completed at $(date)"
