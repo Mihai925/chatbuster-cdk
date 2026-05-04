@@ -5,7 +5,10 @@ exec > >(tee /var/log/user-data.log) 2>&1
 echo "Starting user-data script at $(date)"
 
 # Install dependencies
-dnf install -y nodejs20 npm git jq
+dnf install -y nodejs20 nodejs20-npm git jq
+
+# Use Node 20 as default
+alternatives --set node /usr/bin/node-20
 
 # Create app user
 useradd -m -s /bin/bash chatbuster || true
@@ -76,8 +79,8 @@ if aws s3 cp s3://__DEPLOYMENT_BUCKET__/chatbuster-api/latest.tar.gz /tmp/app.ta
   cd /opt/chatbuster
   sudo -u chatbuster npm ci --omit=dev
 
-  echo "Running database migrations..."
-  sudo -u chatbuster npx prisma migrate deploy --schema=prisma/schema.postgresql.prisma
+  echo "Pushing database schema..."
+  sudo -u chatbuster npx prisma db push --schema=prisma/schema.postgresql.prisma --accept-data-loss
 
   echo "Starting ChatBuster service..."
   systemctl start chatbuster
