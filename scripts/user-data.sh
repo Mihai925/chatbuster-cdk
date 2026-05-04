@@ -9,6 +9,9 @@ dnf install -y nodejs20 nodejs20-npm git jq
 
 # Use Node 20 as default
 alternatives --set node /usr/bin/node-20
+export PATH="/usr/bin:$PATH"
+node --version
+npm --version
 
 # Create app user
 useradd -m -s /bin/bash chatbuster || true
@@ -57,7 +60,7 @@ Type=simple
 User=chatbuster
 WorkingDirectory=/opt/chatbuster
 EnvironmentFile=/opt/chatbuster/.env
-ExecStart=/usr/bin/node dist/index.js
+ExecStart=/usr/bin/node-20 dist/index.js
 Restart=always
 RestartSec=5
 
