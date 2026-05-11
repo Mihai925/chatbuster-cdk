@@ -35,6 +35,7 @@ echo "Fetching application secrets..."
 ANTHROPIC_KEY=$(aws secretsmanager get-secret-value --secret-id "__ANTHROPIC_SECRET_ARN__" --query SecretString --output text 2>/dev/null || echo "")
 SESSION_SECRET=$(aws secretsmanager get-secret-value --secret-id "__SESSION_SECRET_ARN__" --query SecretString --output text)
 AUDIT_PASSWORD=$(aws secretsmanager get-secret-value --secret-id "__AUDIT_PASSWORD_SECRET_ARN__" --query SecretString --output text 2>/dev/null || echo "")
+CREDENTIALS_ENCRYPTION_KEY=$(aws secretsmanager get-secret-value --secret-id "__CREDENTIALS_ENCRYPTION_KEY_SECRET_ARN__" --query SecretString --output text)
 
 # Create environment file
 cat > /opt/chatbuster/.env << EOF
@@ -44,6 +45,7 @@ DATABASE_URL=postgresql://${DB_USER}:${DB_PASS}@${DB_HOST}:${DB_PORT}/${DB_NAME}
 ANTHROPIC_API_KEY=${ANTHROPIC_KEY}
 SESSION_TOKEN_SECRET=${SESSION_SECRET}
 AUDIT_PASSWORD=${AUDIT_PASSWORD}
+CREDENTIALS_ENCRYPTION_KEY=${CREDENTIALS_ENCRYPTION_KEY}
 EOF
 
 # Set ownership
