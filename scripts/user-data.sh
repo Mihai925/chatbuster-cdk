@@ -52,6 +52,10 @@ LS_VARIANT_STARTER_ANNUAL=$(echo "$LS_BUNDLE" | jq -r '.variantStarterAnnual // 
 LS_VARIANT_GROWTH_ANNUAL=$(echo "$LS_BUNDLE" | jq -r '.variantGrowthAnnual // ""')
 LS_VARIANT_SCALE_ANNUAL=$(echo "$LS_BUNDLE" | jq -r '.variantScaleAnnual // ""')
 
+RESEND_BUNDLE=$(aws secretsmanager get-secret-value --secret-id "__RESEND_SECRET_ARN__" --query SecretString --output text)
+RESEND_API_KEY=$(echo "$RESEND_BUNDLE" | jq -r '.apiKey // ""')
+EMAIL_FROM=$(echo "$RESEND_BUNDLE" | jq -r '.emailFrom // "ChatBuster <noreply@chatbuster.com>"')
+
 # Create environment file
 cat > /opt/chatbuster/.env << EOF
 NODE_ENV=production
@@ -72,6 +76,8 @@ LEMONSQUEEZY_VARIANT_ID_STARTER_ANNUAL=${LS_VARIANT_STARTER_ANNUAL}
 LEMONSQUEEZY_VARIANT_ID_GROWTH_ANNUAL=${LS_VARIANT_GROWTH_ANNUAL}
 LEMONSQUEEZY_VARIANT_ID_SCALE_ANNUAL=${LS_VARIANT_SCALE_ANNUAL}
 PUBLIC_APP_URL=https://chatbuster.com
+RESEND_API_KEY=${RESEND_API_KEY}
+EMAIL_FROM=${EMAIL_FROM}
 EOF
 
 # Set ownership
