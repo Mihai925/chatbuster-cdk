@@ -38,19 +38,18 @@ AUDIT_PASSWORD=$(aws secretsmanager get-secret-value --secret-id "__AUDIT_PASSWO
 CREDENTIALS_ENCRYPTION_KEY=$(aws secretsmanager get-secret-value --secret-id "__CREDENTIALS_ENCRYPTION_KEY_SECRET_ARN__" --query SecretString --output text)
 JWT_SECRET=$(aws secretsmanager get-secret-value --secret-id "__JWT_SECRET_ARN__" --query SecretString --output text)
 
-# LemonSqueezy bundle is a JSON blob - fetch once, parse each field via jq.
-# Empty strings are fine; the API treats checkout/webhook as unavailable until
-# the operator pastes real values via AWS Console.
-LS_BUNDLE=$(aws secretsmanager get-secret-value --secret-id "__LEMONSQUEEZY_SECRET_ARN__" --query SecretString --output text)
-LS_API_KEY=$(echo "$LS_BUNDLE" | jq -r '.apiKey // ""')
-LS_STORE_ID=$(echo "$LS_BUNDLE" | jq -r '.storeId // ""')
-LS_WEBHOOK_SECRET=$(echo "$LS_BUNDLE" | jq -r '.webhookSecret // ""')
-LS_VARIANT_STARTER=$(echo "$LS_BUNDLE" | jq -r '.variantStarter // ""')
-LS_VARIANT_GROWTH=$(echo "$LS_BUNDLE" | jq -r '.variantGrowth // ""')
-LS_VARIANT_SCALE=$(echo "$LS_BUNDLE" | jq -r '.variantScale // ""')
-LS_VARIANT_STARTER_ANNUAL=$(echo "$LS_BUNDLE" | jq -r '.variantStarterAnnual // ""')
-LS_VARIANT_GROWTH_ANNUAL=$(echo "$LS_BUNDLE" | jq -r '.variantGrowthAnnual // ""')
-LS_VARIANT_SCALE_ANNUAL=$(echo "$LS_BUNDLE" | jq -r '.variantScaleAnnual // ""')
+# Stripe Managed Payments bundle is a JSON blob - fetch once, parse each field
+# via jq. Empty strings are fine; the API treats checkout / billing-portal /
+# webhook as unavailable until the operator pastes real values via AWS Console.
+STRIPE_BUNDLE=$(aws secretsmanager get-secret-value --secret-id "__STRIPE_SECRET_ARN__" --query SecretString --output text)
+STRIPE_SECRET_KEY_VALUE=$(echo "$STRIPE_BUNDLE" | jq -r '.secretKey // ""')
+STRIPE_WEBHOOK_SECRET_VALUE=$(echo "$STRIPE_BUNDLE" | jq -r '.webhookSecret // ""')
+STRIPE_PRICE_STARTER_MONTHLY_VALUE=$(echo "$STRIPE_BUNDLE" | jq -r '.priceStarterMonthly // ""')
+STRIPE_PRICE_STARTER_ANNUAL_VALUE=$(echo "$STRIPE_BUNDLE" | jq -r '.priceStarterAnnual // ""')
+STRIPE_PRICE_GROWTH_MONTHLY_VALUE=$(echo "$STRIPE_BUNDLE" | jq -r '.priceGrowthMonthly // ""')
+STRIPE_PRICE_GROWTH_ANNUAL_VALUE=$(echo "$STRIPE_BUNDLE" | jq -r '.priceGrowthAnnual // ""')
+STRIPE_PRICE_SCALE_MONTHLY_VALUE=$(echo "$STRIPE_BUNDLE" | jq -r '.priceScaleMonthly // ""')
+STRIPE_PRICE_SCALE_ANNUAL_VALUE=$(echo "$STRIPE_BUNDLE" | jq -r '.priceScaleAnnual // ""')
 
 RESEND_BUNDLE=$(aws secretsmanager get-secret-value --secret-id "__RESEND_SECRET_ARN__" --query SecretString --output text)
 RESEND_API_KEY=$(echo "$RESEND_BUNDLE" | jq -r '.apiKey // ""')
@@ -66,15 +65,14 @@ SESSION_TOKEN_SECRET=${SESSION_SECRET}
 AUDIT_PASSWORD=${AUDIT_PASSWORD}
 CREDENTIALS_ENCRYPTION_KEY=${CREDENTIALS_ENCRYPTION_KEY}
 JWT_SECRET=${JWT_SECRET}
-LEMONSQUEEZY_API_KEY=${LS_API_KEY}
-LEMONSQUEEZY_STORE_ID=${LS_STORE_ID}
-LEMONSQUEEZY_WEBHOOK_SECRET=${LS_WEBHOOK_SECRET}
-LEMONSQUEEZY_VARIANT_ID_STARTER=${LS_VARIANT_STARTER}
-LEMONSQUEEZY_VARIANT_ID_GROWTH=${LS_VARIANT_GROWTH}
-LEMONSQUEEZY_VARIANT_ID_SCALE=${LS_VARIANT_SCALE}
-LEMONSQUEEZY_VARIANT_ID_STARTER_ANNUAL=${LS_VARIANT_STARTER_ANNUAL}
-LEMONSQUEEZY_VARIANT_ID_GROWTH_ANNUAL=${LS_VARIANT_GROWTH_ANNUAL}
-LEMONSQUEEZY_VARIANT_ID_SCALE_ANNUAL=${LS_VARIANT_SCALE_ANNUAL}
+STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY_VALUE}
+STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET_VALUE}
+STRIPE_PRICE_STARTER_MONTHLY=${STRIPE_PRICE_STARTER_MONTHLY_VALUE}
+STRIPE_PRICE_STARTER_ANNUAL=${STRIPE_PRICE_STARTER_ANNUAL_VALUE}
+STRIPE_PRICE_GROWTH_MONTHLY=${STRIPE_PRICE_GROWTH_MONTHLY_VALUE}
+STRIPE_PRICE_GROWTH_ANNUAL=${STRIPE_PRICE_GROWTH_ANNUAL_VALUE}
+STRIPE_PRICE_SCALE_MONTHLY=${STRIPE_PRICE_SCALE_MONTHLY_VALUE}
+STRIPE_PRICE_SCALE_ANNUAL=${STRIPE_PRICE_SCALE_ANNUAL_VALUE}
 PUBLIC_APP_URL=https://chatbuster.com
 RESEND_API_KEY=${RESEND_API_KEY}
 EMAIL_FROM=${EMAIL_FROM}
