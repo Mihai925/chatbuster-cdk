@@ -37,6 +37,7 @@ SESSION_SECRET=$(aws secretsmanager get-secret-value --secret-id "__SESSION_SECR
 AUDIT_PASSWORD=$(aws secretsmanager get-secret-value --secret-id "__AUDIT_PASSWORD_SECRET_ARN__" --query SecretString --output text 2>/dev/null || echo "")
 CREDENTIALS_ENCRYPTION_KEY=$(aws secretsmanager get-secret-value --secret-id "__CREDENTIALS_ENCRYPTION_KEY_SECRET_ARN__" --query SecretString --output text)
 JWT_SECRET=$(aws secretsmanager get-secret-value --secret-id "__JWT_SECRET_ARN__" --query SecretString --output text)
+ADMIN_SECRET=$(aws secretsmanager get-secret-value --secret-id "__ADMIN_SECRET_ARN__" --query SecretString --output text)
 
 # Stripe Managed Payments bundle is a JSON blob - fetch once, parse each field
 # via jq. Empty strings are fine; the API treats checkout / billing-portal /
@@ -65,6 +66,7 @@ SESSION_TOKEN_SECRET=${SESSION_SECRET}
 AUDIT_PASSWORD=${AUDIT_PASSWORD}
 CREDENTIALS_ENCRYPTION_KEY=${CREDENTIALS_ENCRYPTION_KEY}
 JWT_SECRET=${JWT_SECRET}
+CHATBUSTER_ADMIN_SECRET=${ADMIN_SECRET}
 STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY_VALUE}
 STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET_VALUE}
 STRIPE_PRICE_STARTER_MONTHLY=${STRIPE_PRICE_STARTER_MONTHLY_VALUE}

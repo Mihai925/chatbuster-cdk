@@ -41,6 +41,7 @@ Resources:
                 token.actions.githubusercontent.com:sub:
                   - !Sub repo:${GitHubOrg}/${GitHubRepo}:*
                   - !Sub repo:${GitHubOrg}/chatbuster-api:*
+                  - !Sub repo:${GitHubOrg}/chatbuster-app:*
       MaxSessionDuration: 3600
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AdministratorAccess
