@@ -39,6 +39,12 @@ CREDENTIALS_ENCRYPTION_KEY=$(aws secretsmanager get-secret-value --secret-id "__
 JWT_SECRET=$(aws secretsmanager get-secret-value --secret-id "__JWT_SECRET_ARN__" --query SecretString --output text)
 ADMIN_SECRET=$(aws secretsmanager get-secret-value --secret-id "__ADMIN_SECRET_ARN__" --query SecretString --output text)
 
+# Shopify app client secret — the SAME chatbuster/shopify-api-secret the
+# chatbuster-app fleet already reads (no new secret). Used here for the App
+# Events usage-billing token grant. Empty until the operator pastes the real
+# value via AWS Console.
+SHOPIFY_API_SECRET=$(aws secretsmanager get-secret-value --secret-id "__SHOPIFY_API_SECRET_ARN__" --query SecretString --output text 2>/dev/null || echo "")
+
 # Stripe Managed Payments bundle is a JSON blob - fetch once, parse each field
 # via jq. Empty strings are fine; the API treats checkout / billing-portal /
 # webhook as unavailable until the operator pastes real values via AWS Console.
@@ -67,6 +73,10 @@ AUDIT_PASSWORD=${AUDIT_PASSWORD}
 CREDENTIALS_ENCRYPTION_KEY=${CREDENTIALS_ENCRYPTION_KEY}
 JWT_SECRET=${JWT_SECRET}
 CHATBUSTER_ADMIN_SECRET=${ADMIN_SECRET}
+SHOPIFY_API_KEY=__SHOPIFY_API_KEY__
+SHOPIFY_API_SECRET=${SHOPIFY_API_SECRET}
+SHOPIFY_OVERAGE_CAP_MULTIPLIER=10
+SHOPIFY_USAGE_EVENT_HANDLE=conversations
 STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY_VALUE}
 STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET_VALUE}
 STRIPE_PRICE_STARTER_MONTHLY=${STRIPE_PRICE_STARTER_MONTHLY_VALUE}
@@ -78,6 +88,7 @@ STRIPE_PRICE_SCALE_ANNUAL=${STRIPE_PRICE_SCALE_ANNUAL_VALUE}
 PUBLIC_APP_URL=https://chatbuster.com
 RESEND_API_KEY=${RESEND_API_KEY}
 EMAIL_FROM=${EMAIL_FROM}
+INDEXED_PAGES_LIMIT=5000
 EOF
 
 # Set ownership
