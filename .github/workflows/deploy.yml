@@ -57,3 +57,17 @@ jobs:
               --auto-scaling-group-name "$ASG_NAME" \
               --preferences '{"MinHealthyPercentage":100,"MaxHealthyPercentage":200,"InstanceWarmup":300}'
           fi
+
+      - name: Trigger Instance Refresh - Shopify app (if app updated)
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          ASG_NAME=$(aws cloudformation describe-stacks \
+            --stack-name ChatBusterStack \
+            --query "Stacks[0].Outputs[?starts_with(OutputKey, 'ShopifyAppComputeShopifyAppAsgName')].OutputValue" \
+            --output text)
+          if [ -n "$ASG_NAME" ] && [ "$ASG_NAME" != "None" ]; then
+            echo "Triggering Instance Refresh for $ASG_NAME"
+            aws autoscaling start-instance-refresh \
+              --auto-scaling-group-name "$ASG_NAME" \
+              --preferences '{"MinHealthyPercentage":100,"MaxHealthyPercentage":200,"InstanceWarmup":300}'
+          fi
