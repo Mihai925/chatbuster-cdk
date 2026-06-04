@@ -94,7 +94,12 @@ STRIPE_PRICE_SCALE_ANNUAL=${STRIPE_PRICE_SCALE_ANNUAL_VALUE}
 PUBLIC_APP_URL=https://chatbuster.com
 RESEND_API_KEY=${RESEND_API_KEY}
 EMAIL_FROM=${EMAIL_FROM}
-INDEXED_PAGES_LIMIT=5000
+# Background scrape-drainer throughput (src/lib/scrapeDrainer.ts). Pages scraped
+# in parallel per instance; raise to fill large catalogues faster, lower to be
+# gentler on live /chat traffic and CPU credits. Other knobs (SCRAPE_TICK_MS,
+# SCRAPE_PER_STORE_BATCH, SCRAPE_MAX_STORES_PER_TICK, SCRAPE_STALE_MS) default
+# sensibly and can be added here if needed.
+SCRAPE_CONCURRENCY=4
 EOF
 
 # Set ownership
