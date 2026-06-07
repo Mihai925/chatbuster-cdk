@@ -36,6 +36,10 @@ ANTHROPIC_KEY=$(aws secretsmanager get-secret-value --secret-id "__ANTHROPIC_SEC
 # Embeddings provider key for RAG search. Empty until set; the API then treats
 # RAG as unavailable and the chatbot falls back to list_pages browsing.
 EMBEDDING_KEY=$(aws secretsmanager get-secret-value --secret-id "__EMBEDDINGS_SECRET_ARN__" --query SecretString --output text 2>/dev/null || echo "")
+# DeepSeek key for the per-store model switch. Empty until set; the API then
+# falls every store back to the default Claude model. Optional, like the
+# embeddings key.
+DEEPSEEK_KEY=$(aws secretsmanager get-secret-value --secret-id "__DEEPSEEK_SECRET_ARN__" --query SecretString --output text 2>/dev/null || echo "")
 SESSION_SECRET=$(aws secretsmanager get-secret-value --secret-id "__SESSION_SECRET_ARN__" --query SecretString --output text)
 AUDIT_PASSWORD=$(aws secretsmanager get-secret-value --secret-id "__AUDIT_PASSWORD_SECRET_ARN__" --query SecretString --output text 2>/dev/null || echo "")
 CREDENTIALS_ENCRYPTION_KEY=$(aws secretsmanager get-secret-value --secret-id "__CREDENTIALS_ENCRYPTION_KEY_SECRET_ARN__" --query SecretString --output text)
@@ -72,6 +76,7 @@ PORT=3001
 DATABASE_URL=postgresql://${DB_USER}:${DB_PASS}@${DB_HOST}:${DB_PORT}/${DB_NAME}
 ANTHROPIC_API_KEY=${ANTHROPIC_KEY}
 EMBEDDING_API_KEY=${EMBEDDING_KEY}
+DEEPSEEK_API_KEY=${DEEPSEEK_KEY}
 EMBEDDING_PROVIDER=voyage
 EMBEDDING_MODEL=voyage-4-lite
 SESSION_TOKEN_SECRET=${SESSION_SECRET}
